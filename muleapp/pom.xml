@@ -38,7 +38,7 @@
 						<muleVersion>4.3.0</muleVersion>
 						<workers>1</workers>
 						<workerType>Micro</workerType>
-						<applicationName>muleapp-Vikash</applicationName>
+						<applicationName>muleapp-vikash</applicationName>
 						<objectStoreV2>true</objectStoreV2>
 					</cloudHubDeployment>
 				
