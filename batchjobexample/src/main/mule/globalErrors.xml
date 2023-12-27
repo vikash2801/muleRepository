@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd">
+	<error-handler name="globalErrorsError_Handler" doc:id="96939b9a-7834-41df-8fc7-58a16346b51b" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c28f05dc-c68b-4797-9e82-f824b3c336dc" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="af4000f4-1580-4f22-b7a6-b3e3480332e5" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"Code": 599,
+	"message": "caught exception"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="8cad6be6-8144-436c-8fd0-c97e3a880b1d" name="globalErrorsSub_Flow"/>
+		</on-error-continue>
+	</error-handler>
+	<sub-flow name="globalErrorsSub_Flow" doc:id="27958596-5f82-48d0-9162-f0264b98195c" >
+		<logger level="INFO" doc:name="Logger" doc:id="7c6f30cf-957c-463f-95c7-beb0b42bdecb" message="Error handled by custom err handler"/>
+	</sub-flow>
+</mule>

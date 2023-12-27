@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<flow name="batchjobexampleFlow" doc:id="ad6689b2-c161-427b-95ea-8c58869b4789" >
+		<http:listener doc:name="Listener" doc:id="f9bf00f0-d762-4fc7-bb2a-9a7290b15971" config-ref="HTTP_Listener_config" path="/batch"/>
+		<set-payload value='#[[1,2,3,"a",4,5,"b",6,7]]' doc:name='[1,2,3,"a",4,5,"b",6,7]' doc:id="79bb753e-ae41-4187-bc3e-8a19ed0a385b" />
+		<batch:job jobName="batchjobexampleBatch_Job" doc:id="d38aab58-4c8d-46cd-862e-436b20981a55" maxFailedRecords="2" blockSize="5">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="ea98db3f-576a-4b6c-9d8f-b419a6e87cf2" acceptPolicy="ALL">
+					<set-payload value="#[payload*10]" doc:name="payload*10" doc:id="e614aae7-c758-4d04-9750-8772927542a5" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="3e40d361-40b3-4e6d-91b3-6434ac19531c" size="3">
+						<logger level="INFO" doc:name="Logger" doc:id="a2719e1f-e785-423f-8238-df855d1372f9" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+				<batch:step name="Batch_Step1" doc:id="4063d0de-1a7a-4aaf-931e-383d074d6713" acceptPolicy="ONLY_FAILURES">
+					<set-payload value='#["char: " ++ payload]' doc:name='"char: " ++ payload ' doc:id="4bbd1b50-362a-4dab-b14d-f19f4d4a0f5e" />
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="241e1c9e-8a20-41b2-8695-244b9d7a662e" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="82057091-2c37-41f0-ae41-21aa7f9d7a68" message="#[payload]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete>
+				<logger level="INFO" doc:name="Logger" doc:id="4978008b-9387-43dc-a6cd-29d1d7dc3826" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger" doc:id="ebc9ad96-a495-4f19-83a3-55df8074dbb8" message="#[payload]"/>
+	</flow>
+	<flow name="forEachFlow" doc:id="152b9acc-efc1-4188-97eb-d24ba9c08173" >
+		<http:listener doc:name="Listener" doc:id="0971f96d-2aaf-409a-a3a6-20aaea807a84" config-ref="HTTP_Listener_config" path="/each"/>
+		<set-payload value='#[[1,2,3,4,5,6,7]]' doc:name='[1,2,3,4,5,6,7]' doc:id="23118e78-5774-4f51-bdc3-7407ff9aafb3" />
+		<foreach doc:name="For Each" doc:id="14e50760-e6d7-4e33-b263-4425f2ae21b3" batchSize="2">
+			<set-payload value="#[payload[0] + (payload[1] default 0)]" doc:name="payload[0] + (payload[1] default 0)" doc:id="2c0aca0d-5d2e-4859-8c4d-2bbb0f715ab5" />
+			<logger level="INFO" doc:name="logged value: #[payload]" doc:id="9f29ca64-af06-47c1-843e-8c97d88d9143" message="logged value: #[payload]" />
+			<set-variable value="#[payload]" doc:name="mulipliedValue" doc:id="4cd862b6-4398-4aea-96eb-6149ee5eae77" variableName="mulipliedValue"/>
+		</foreach>
+		<logger level="INFO" doc:name="payload entering parallel forEach: #[payload]" doc:id="9f652b1a-4e42-4f85-88a1-5835422fe62e" message='payload entering parallel forEach: #[payload]'/>
+		<set-payload value='#[payload ++ ["a"]]' doc:name='payload ++ ["a"]' doc:id="9c409e42-6538-42a6-acef-465eb50c9f3b" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="c3823462-b99f-4304-8805-fcab73fb3109" >
+			<set-payload value="#[payload + 5]" doc:name="payload + 5" doc:id="245b00d5-fe8d-4755-95dc-a152d17d767f" />
+			<logger level="INFO" doc:name="logged value: #[payload]" doc:id="c68613d3-8e74-4072-8baf-9d1e31c02c84" message="logged value: #[payload]"/>
+			<set-variable value="#[payload]" doc:name="addedValue" doc:id="35982857-443c-4fda-808a-8a8ee27289f3" variableName="addedValue"/>
+		</parallel-foreach>
+		<logger level="INFO" doc:name="payload after Parallel ForEach: #[payload]" doc:id="809ae090-bf76-4e1e-af41-7726eecf1147" message="payload after Parallel ForEach: #[payload]"/>
+	</flow>
+	<flow name="SecurePropertiesFlow" doc:id="7dfa4f1e-fbcc-47b2-94b5-9bb5eda9ccc4" >
+		<http:listener doc:name="Listener" doc:id="d42adf00-38bc-43d2-af02-8f44e67172bd" config-ref="HTTP_Listener_config" path="/properties"/>
+		<set-payload value='#[output application/java&#10;---&#10;"Username: " ++ Mule::p("secure::example.username") &#10;++ "  "&#10;++ "Password: " ++ Mule::p("secure::example.password")]' doc:name="Set Payload" doc:id="5f0e75e1-2512-4abe-acae-9ddfc8d20eb5" />
+		<logger level="INFO" doc:name="Logger" doc:id="3877eb0d-a536-4033-9ae5-6427bb71bab3" message='#[payload]'/>
+	</flow>
+</mule>
